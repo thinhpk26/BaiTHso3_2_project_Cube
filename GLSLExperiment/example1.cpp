@@ -315,7 +315,6 @@ class Thinh {
 
 public:
 	static void run() {
-
 	}
 };
 
@@ -335,7 +334,6 @@ class Nhat {
 
 public:
 	static void run() {
-
 	}
 };
 
@@ -349,15 +347,8 @@ void display(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// Phương thức vẽ
 
-	Nhat::run();
-	Hung::run();
-	Thinh::run();
-	Thu::run();
-	Son::run();
-
-	glUniformMatrix4fv(model_loc, 1, GL_TRUE, model);
+	/*glUniformMatrix4fv(model_loc, 1, GL_TRUE, model);*/
 
 	vec4 eye(0 + XEye, 0 + YEye, 2 + ZEye, 1);
 	vec4 at(0 + XEye, 0 + YEye, 0 + ZEye, 1);
@@ -369,9 +360,17 @@ void display(void)
 	projection = Frustum(-1, 1, -1, 1, 1, 4);
 	glUniformMatrix4fv(projection_loc, 1, GL_TRUE, projection);
 
+	// Phương thức vẽ
+	Nhat::run();
+	Hung::run();
+	Thinh::run();
+	Thu::run();
+	Son::run();
+
 	// Phải dùng 2 dòng lệnh để vẽ hình trụ hoặc hình lập phương
-	setDrawObject(bufferCube, sizeof(pointsCube));
-	glDrawArrays(GL_TRIANGLES, 0, NumPointsCube);    /*Vẽ các tam giác*/
+	/*setDrawObject(bufferCube, sizeof(pointsCube));
+	glDrawArrays(GL_TRIANGLES, 0, NumPointsCube);*/
+	  /*Vẽ các tam giác*/
 	glutSwapBuffers();
 }
 
