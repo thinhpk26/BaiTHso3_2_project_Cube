@@ -82,9 +82,96 @@ void generateGeometryCube(void)
 	makeColorCube();
 }
 
-//
+//------------------------------------------- Hình trụ tròn----------------------------------------------------
 
+// số đường muốn vẽ
+int edge = 12;
+// Số các đỉnh -  bằng với hệ số bên dưới
+const int NumPointsCylinder = 12 * 12 * 2;
 
+// tạo độ 2 điểm trung trực
+point4 verticesCenterSurfaceCylinder[2] = { point4(0, 1, 0, 1), point4(0, -1, 0, 1) };
+
+point4 calVertices(point4 centerSurface, GLfloat radius) {
+	float x = (centerSurface.x + 1) * cos(radius);
+	float y = centerSurface.y;
+	float z = (centerSurface.z + 1) * sin(radius);
+	return point4(x, y, z, 1);
+}
+
+point4 pointsCylinder[NumPointsCylinder]; /* Danh sách các đỉnh của các tam giác cần vẽ*/
+color4 colorsCylinder[NumPointsCylinder]; /* Danh sách các màu tương ứng cho các đỉnh trên*/
+vec3 normalsCylinder[NumPointsCylinder]; /*Danh sách các vector pháp tuyến ứng với mỗi đỉnh*/
+
+point4 verticesUpCylinder[12];
+point4 verticesBottomCylinder[12];
+point4 vertex_colorsCylinder[12];
+
+void InitCylinder(int edge) {
+	for (int i = 0; i < edge; i++) {
+		// Tạo độ các điểm trên mặt trên
+		verticesUpCylinder[i] = calVertices(verticesCenterSurfaceCylinder[0], i * (2* M_PI / edge));
+		// Tạo độ các điểm trên mặt dưới
+		verticesBottomCylinder[i] = calVertices(verticesCenterSurfaceCylinder[1],  i * (2 * M_PI / edge));
+	}
+
+	// Gán giá trị màu sắc cho các đỉnh của hình lập phương	
+	vertex_colorsCylinder[0] = color4(0.0, 0.0, 0.0, 1.0); // black
+	vertex_colorsCylinder[1] = color4(1.0, 0.0, 0.0, 1.0); // red
+	vertex_colorsCylinder[2] = color4(1.0, 1.0, 0.0, 1.0); // yellow
+	vertex_colorsCylinder[3] = color4(0.0, 1.0, 0.0, 1.0); // green
+	vertex_colorsCylinder[4] = color4(0.0, 0.0, 1.0, 1.0); // blue
+	vertex_colorsCylinder[5] = color4(1.0, 0.0, 1.0, 1.0); // magenta
+	vertex_colorsCylinder[6] = color4(1.0, 1.0, 1.0, 1.0); // white
+	vertex_colorsCylinder[7] = color4(0.0, 1.0, 1.0, 1.0); // cyan
+}
+int IndexForCylinder = 0;
+void quadCylinder(int a, int b, int c, int d)  /*Tạo một mặt hình lập phương = 2 tam giác, gán màu cho mỗi đỉnh tương ứng trong mảng colors*/
+{
+	vec4 u = verticesBottomCylinder[b] - verticesUpCylinder[a];
+	vec4 v = verticesBottomCylinder[c] - verticesBottomCylinder[b];
+	vec3 normal = normalize(cross(u, v));
+
+	normalsCylinder[IndexForCylinder] = normal; colorsCylinder[IndexForCylinder] = vertex_colorsCylinder[a]; pointsCylinder[IndexForCylinder] = verticesUpCylinder[a]; IndexForCylinder++;
+	normalsCylinder[IndexForCylinder] = normal; colorsCylinder[IndexForCylinder] = vertex_colorsCylinder[b]; pointsCylinder[IndexForCylinder] = verticesBottomCylinder[b]; IndexForCylinder++;
+	normalsCylinder[IndexForCylinder] = normal; colorsCylinder[IndexForCylinder] = vertex_colorsCylinder[c]; pointsCylinder[IndexForCylinder] = verticesBottomCylinder[c]; IndexForCylinder++;
+	normalsCylinder[IndexForCylinder] = normal; colorsCylinder[IndexForCylinder] = vertex_colorsCylinder[a]; pointsCylinder[IndexForCylinder] = verticesUpCylinder[a]; IndexForCylinder++;
+	normalsCylinder[IndexForCylinder] = normal; colorsCylinder[IndexForCylinder] = vertex_colorsCylinder[c]; pointsCylinder[IndexForCylinder] = verticesBottomCylinder[c]; IndexForCylinder++;
+	normalsCylinder[IndexForCylinder] = normal; colorsCylinder[IndexForCylinder] = vertex_colorsCylinder[d]; pointsCylinder[IndexForCylinder] = verticesUpCylinder[d]; IndexForCylinder++;
+}
+
+void drawSurface(vec4 pointCenter, vec4 point1, vec4 point2) {
+	vec4 u = point1 - point2;
+	vec4 v = pointCenter - point1;
+	vec3 normal = normalize(cross(u, v));
+
+	normalsCylinder[IndexForCylinder] = normal; colorsCylinder[IndexForCylinder] = vertex_colorsCylinder[1]; pointsCylinder[IndexForCylinder] = pointCenter; IndexForCylinder++;
+	normalsCylinder[IndexForCylinder] = normal; colorsCylinder[IndexForCylinder] = vertex_colorsCylinder[1]; pointsCylinder[IndexForCylinder] = point1; IndexForCylinder++;
+	normalsCylinder[IndexForCylinder] = normal; colorsCylinder[IndexForCylinder] = vertex_colorsCylinder[1]; pointsCylinder[IndexForCylinder] = point2; IndexForCylinder++;
+}
+
+void makeColorCylinder(int edge)  /* Sinh ra 12 tam giác: 36 đỉnh, 36 màu*/
+
+{
+	for (int i = 1; i < edge; i++) {
+		quadCylinder(i, i, i-1, i-1);
+		drawSurface(verticesCenterSurfaceCylinder[0], verticesUpCylinder[i], verticesUpCylinder[i-1]);
+		drawSurface(verticesCenterSurfaceCylinder[1], verticesBottomCylinder[i], verticesBottomCylinder[i-1]);
+	}
+	quadCylinder(0, 0, edge-1, edge-1);
+	drawSurface(verticesCenterSurfaceCylinder[0], verticesUpCylinder[0], verticesUpCylinder[edge-1]);
+	drawSurface(verticesCenterSurfaceCylinder[1], verticesBottomCylinder[0], verticesBottomCylinder[edge - 1]);
+
+}
+
+void generateGeometryCylinder(void)
+{
+	InitCylinder(edge);
+	makeColorCylinder(edge);
+}
+
+GLuint bufferCylinder;
+GLuint bufferCube;
 
 void initGPUBuffers(void)
 {
@@ -93,15 +180,23 @@ void initGPUBuffers(void)
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
-	// Tạo và khởi tạo một buffer object
-	GLuint buffer;
-	glGenBuffers(1, &buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, buffer);
+	// Tạo và khởi tạo một buffer chứa cube
+	glGenBuffers(1, &bufferCube);
+	glBindBuffer(GL_ARRAY_BUFFER, bufferCube);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(pointsCube) + sizeof(colorsCube) + sizeof(normalsCube), NULL, GL_STATIC_DRAW);
 
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pointsCube), pointsCube);
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(pointsCube), sizeof(colorsCube), colorsCube);
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(pointsCube) + sizeof(colorsCube), sizeof(normalsCube), normalsCube);
+
+	// Tạo và khởi tạo một buffer chứa Cylinder
+	glGenBuffers(1, &bufferCylinder);
+	glBindBuffer(GL_ARRAY_BUFFER, bufferCylinder);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(pointsCylinder) * 3, NULL, GL_STATIC_DRAW);
+
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pointsCylinder), pointsCylinder);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(pointsCylinder), sizeof(colorsCylinder), colorsCylinder);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(pointsCylinder) + sizeof(colorsCylinder), sizeof(normalsCylinder), normalsCylinder);
 
 
 }
@@ -116,24 +211,29 @@ GLuint projection_loc;
 mat4 view;
 GLuint view_loc;
 
+// Set shader nhận diện đang vẽ hình khối nào
+void setDrawObject(GLuint buffer, int size) {
+	glBindBuffer(GL_ARRAY_BUFFER, buffer);
+
+	// Khởi tạo thuộc tính vị trí đỉnh của cube từ vertex shader
+	GLuint loc_vPositionCube = glGetAttribLocation(program, "vPosition");
+	glEnableVertexAttribArray(loc_vPositionCube);
+	glVertexAttribPointer(loc_vPositionCube, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+	GLuint loc_vColorCube = glGetAttribLocation(program, "vColor");
+	glEnableVertexAttribArray(loc_vColorCube);
+	glVertexAttribPointer(loc_vColorCube, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(size));
+
+	GLuint loc_vNormalCube = glGetAttribLocation(program, "vNormal");
+	glEnableVertexAttribArray(loc_vNormalCube);
+	glVertexAttribPointer(loc_vNormalCube, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(size * 2));
+}
+
 void shaderSetup(void)
 {
 	// Nạp các shader và sử dụng chương trình shader
 	program = InitShader("vshader1.glsl", "fshader1.glsl");   // hàm InitShader khai báo trong Angel.h
 	glUseProgram(program);
-
-	// Khởi tạo thuộc tính vị trí đỉnh từ vertex shader
-	GLuint loc_vPosition = glGetAttribLocation(program, "vPosition");
-	glEnableVertexAttribArray(loc_vPosition);
-	glVertexAttribPointer(loc_vPosition, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-
-	GLuint loc_vColor = glGetAttribLocation(program, "vColor");
-	glEnableVertexAttribArray(loc_vColor);
-	glVertexAttribPointer(loc_vColor, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(pointsCube)));
-
-	GLuint loc_vNormal = glGetAttribLocation(program, "vNormal");
-	glEnableVertexAttribArray(loc_vNormal);
-	glVertexAttribPointer(loc_vNormal, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(pointsCube) + sizeof(colorsCube)));
 
 	/* Khởi tạo các tham số chiếu sáng - tô bóng*/
 	point4 light_position(0.0, 0.0, 1.0, 0.0);
@@ -221,7 +321,6 @@ public:
 GLfloat XEye = 0;
 GLfloat YEye = 0;
 GLfloat ZEye = 0;
-GLfloat RHead = 0;
 
 // Phương thức tổng hợp các đối tượng đã được vẽ
 void display(void)
@@ -240,7 +339,7 @@ void display(void)
 
 	vec4 eye(0 + XEye, 0 + YEye, 2 + ZEye, 1);
 	vec4 at(0 + XEye, 0 + YEye, 0 + ZEye, 1);
-	vec4 up(tan(RHead), 1, 0, 1);
+	vec4 up(0, 1, 0, 1);
 
 	view = LookAt(eye, at, up);
 	glUniformMatrix4fv(view_loc, 1, GL_TRUE, view);
@@ -248,7 +347,9 @@ void display(void)
 	projection = Frustum(-1, 1, -1, 1, 1, 4);
 	glUniformMatrix4fv(projection_loc, 1, GL_TRUE, projection);
 
-	glDrawArrays(GL_TRIANGLES, 0, NumPointsCube);    /*Vẽ các tam giác*/
+
+	setDrawObject(bufferCylinder, sizeof(pointsCylinder));
+	glDrawArrays(GL_TRIANGLES, 0, NumPointsCylinder);    /*Vẽ các tam giác*/
 	glutSwapBuffers();
 }
 
@@ -279,12 +380,6 @@ void keyboard(unsigned char key, int x, int y)
 	case 'E':
 		YEye -= 0.5;
 		break;
-	case 'r':
-		RHead += 5;
-		break;
-	case 'R':
-		RHead -= 5;
-		break;
 	}
 	glutPostRedisplay();
 }
@@ -306,7 +401,8 @@ int main(int argc, char** argv)
 	// Cube
 	generateGeometryCube();
 
-	// 
+	// Cylinder
+	generateGeometryCylinder();
 
 	initGPUBuffers();
 	shaderSetup();
