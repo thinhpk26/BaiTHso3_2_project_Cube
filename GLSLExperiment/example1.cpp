@@ -155,11 +155,11 @@ void makeColorCylinder(int edge)  /* Sinh ra 12 tam giác: 36 đỉnh, 36 màu*/
 {
 	for (int i = 1; i < edge; i++) {
 		quadCylinder(i, i, i-1, i-1);
-		drawSurface(verticesCenterSurfaceCylinder[0], verticesUpCylinder[i], verticesUpCylinder[i-1]);
+		drawSurface(verticesCenterSurfaceCylinder[0], verticesUpCylinder[i - 1], verticesUpCylinder[i]);
 		drawSurface(verticesCenterSurfaceCylinder[1], verticesBottomCylinder[i], verticesBottomCylinder[i-1]);
 	}
 	quadCylinder(0, 0, edge-1, edge-1);
-	drawSurface(verticesCenterSurfaceCylinder[0], verticesUpCylinder[0], verticesUpCylinder[edge-1]);
+	drawSurface(verticesCenterSurfaceCylinder[0], verticesUpCylinder[edge - 1], verticesUpCylinder[0]);
 	drawSurface(verticesCenterSurfaceCylinder[1], verticesBottomCylinder[0], verticesBottomCylinder[edge - 1]);
 
 }
@@ -348,7 +348,7 @@ void display(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-	/*glUniformMatrix4fv(model_loc, 1, GL_TRUE, model);*/
+	glUniformMatrix4fv(model_loc, 1, GL_TRUE, model);
 
 	vec4 eye(0 + XEye, 0 + YEye, 2 + ZEye, 1);
 	vec4 at(0 + XEye, 0 + YEye, 0 + ZEye, 1);
@@ -368,8 +368,8 @@ void display(void)
 	Son::run();
 
 	// Phải dùng 2 dòng lệnh để vẽ hình trụ hoặc hình lập phương
-	/*setDrawObject(bufferCube, sizeof(pointsCube));
-	glDrawArrays(GL_TRIANGLES, 0, NumPointsCube);*/
+	setDrawObject(bufferCylinder, sizeof(pointsCylinder));
+	glDrawArrays(GL_TRIANGLES, 0, NumPointsCylinder);
 	  /*Vẽ các tam giác*/
 	glutSwapBuffers();
 }
