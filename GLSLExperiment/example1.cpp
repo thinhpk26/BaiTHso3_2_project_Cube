@@ -85,9 +85,9 @@ void generateGeometryCube(void)
 //------------------------------------------- Hình trụ tròn----------------------------------------------------
 
 // số đường muốn vẽ
-int edge = 12;
+int edge = 100;
 // Số các đỉnh -  bằng với hệ số bên dưới
-const int NumPointsCylinder = 12 * 12 * 2;
+const int NumPointsCylinder = 100 * 12 * 2;
 
 // tạo độ 2 điểm trung trực
 point4 verticesCenterSurfaceCylinder[2] = { point4(0, 1, 0, 1), point4(0, -1, 0, 1) };
@@ -103,9 +103,9 @@ point4 pointsCylinder[NumPointsCylinder]; /* Danh sách các đỉnh của các 
 color4 colorsCylinder[NumPointsCylinder]; /* Danh sách các màu tương ứng cho các đỉnh trên*/
 vec3 normalsCylinder[NumPointsCylinder]; /*Danh sách các vector pháp tuyến ứng với mỗi đỉnh*/
 
-point4 verticesUpCylinder[12];
-point4 verticesBottomCylinder[12];
-point4 vertex_colorsCylinder[12];
+point4 verticesUpCylinder[100];
+point4 verticesBottomCylinder[100];
+point4 vertex_colorsCylinder[100];
 
 void InitCylinder(int edge) {
 	for (int i = 0; i < edge; i++) {
