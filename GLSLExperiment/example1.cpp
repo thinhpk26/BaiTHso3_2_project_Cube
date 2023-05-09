@@ -85,9 +85,9 @@ void generateGeometryCube(void)
 //------------------------------------------- Hình trụ tròn----------------------------------------------------
 
 // số đường muốn vẽ
-int edge = 100;
+int edge = 300;
 // Số các đỉnh -  bằng với hệ số bên dưới
-const int NumPointsCylinder = 100 * 12 * 2;
+const int NumPointsCylinder = 300 * 12 * 2;
 
 // tạo độ 2 điểm trung trực
 point4 verticesCenterSurfaceCylinder[2] = { point4(0, 1, 0, 1), point4(0, -1, 0, 1) };
@@ -103,9 +103,9 @@ point4 pointsCylinder[NumPointsCylinder]; /* Danh sách các đỉnh của các 
 color4 colorsCylinder[NumPointsCylinder]; /* Danh sách các màu tương ứng cho các đỉnh trên*/
 vec3 normalsCylinder[NumPointsCylinder]; /*Danh sách các vector pháp tuyến ứng với mỗi đỉnh*/
 
-point4 verticesUpCylinder[100];
-point4 verticesBottomCylinder[100];
-point4 vertex_colorsCylinder[100];
+point4 verticesUpCylinder[300];
+point4 verticesBottomCylinder[300];
+point4 vertex_colorsCylinder[300];
 
 void InitCylinder(int edge) {
 	for (int i = 0; i < edge; i++) {
@@ -173,6 +173,12 @@ void generateGeometryCylinder(void)
 GLuint bufferCylinder;
 GLuint bufferCube;
 
+GLuint bufferOfSon;
+GLuint bufferOfThinh;
+GLuint bufferOfThu;
+GLuint bufferOfNhat;
+GLuint bufferOfHung;
+
 void initGPUBuffers(void)
 {
 	// Tạo một VAO - vertex array object
@@ -197,6 +203,23 @@ void initGPUBuffers(void)
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pointsCylinder), pointsCylinder);
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(pointsCylinder), sizeof(colorsCylinder), colorsCylinder);
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(pointsCylinder) + sizeof(colorsCylinder), sizeof(normalsCylinder), normalsCylinder);
+
+	// Khởi tạo cho mỗi người 1 buffer làm việc riêng (Khoảng không gian làm việc với đỉnh riêng)
+	glGenBuffers(1, &bufferOfSon);
+	glBindBuffer(GL_ARRAY_BUFFER, bufferOfSon);
+
+	glGenBuffers(1, &bufferOfSon);
+	glBindBuffer(GL_ARRAY_BUFFER, bufferOfThinh);
+
+	glGenBuffers(1, &bufferOfSon);
+	glBindBuffer(GL_ARRAY_BUFFER, bufferOfNhat);
+
+	glGenBuffers(1, &bufferOfSon);
+	glBindBuffer(GL_ARRAY_BUFFER, bufferOfThu);
+
+	glGenBuffers(1, &bufferOfSon);
+	glBindBuffer(GL_ARRAY_BUFFER, bufferOfHung);
+
 
 
 }
@@ -266,7 +289,6 @@ void shaderSetup(void)
 }
 
 
-// 500 - 1000
 // Sơn
 class Son {
 
@@ -277,7 +299,7 @@ public:
 	}
 };
 
-// 1001 - 1500
+
 // Thư
 class Thu {
 
@@ -287,7 +309,7 @@ public:
 	}
 };
 
-//1501-2000
+
 // Thịnh
 class Thinh {
 
@@ -297,7 +319,7 @@ public:
 	}
 };
 
-//2001-2500
+
 // Hùng
 class Hung {
 
@@ -307,7 +329,7 @@ public:
 	}
 };
 
-//2501-3000
+
 // Nhật
 class Nhat {
 
@@ -347,9 +369,9 @@ void display(void)
 	projection = Frustum(-1, 1, -1, 1, 1, 4);
 	glUniformMatrix4fv(projection_loc, 1, GL_TRUE, projection);
 
-
-	setDrawObject(bufferCylinder, sizeof(pointsCylinder));
-	glDrawArrays(GL_TRIANGLES, 0, NumPointsCylinder);    /*Vẽ các tam giác*/
+	// Phải dùng 2 dòng lệnh để vẽ hình trụ hoặc hình lập phương
+	setDrawObject(bufferCube, sizeof(pointsCube));
+	glDrawArrays(GL_TRIANGLES, 0, NumPointsCube);    /*Vẽ các tam giác*/
 	glutSwapBuffers();
 }
 
