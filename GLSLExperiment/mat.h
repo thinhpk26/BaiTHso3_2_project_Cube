@@ -787,7 +787,7 @@ void printm(const mat4 a)
 }
 
 inline
-mat4 identity()
+mat4 Identity()
 {
     //Error( "replace with either a matrix constructor or identity method" );
     mat4 c;
