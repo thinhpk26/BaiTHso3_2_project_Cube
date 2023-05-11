@@ -90,12 +90,12 @@ int edge = 300;
 const int NumPointsCylinder = 300 * 12 * 2;
 
 // tạo độ 2 điểm trung trực
-point4 verticesCenterSurfaceCylinder[2] = { point4(0, 1, 0, 1), point4(0, -1, 0, 1) };
+point4 verticesCenterSurfaceCylinder[2] = { point4(0, 0.5, 0, 1), point4(0, -0.5, 0, 1) };
 
 point4 calVertices(point4 centerSurface, GLfloat radius) {
-	float x = (centerSurface.x + 1) * cos(radius);
+	float x = (centerSurface.x + 0.5) * cos(radius);
 	float y = centerSurface.y;
-	float z = (centerSurface.z + 1) * sin(radius);
+	float z = (centerSurface.z + 0.5) * sin(radius);
 	return point4(x, y, z, 1);
 }
 
@@ -208,16 +208,16 @@ void initGPUBuffers(void)
 	glGenBuffers(1, &bufferOfSon);
 	glBindBuffer(GL_ARRAY_BUFFER, bufferOfSon);
 
-	glGenBuffers(1, &bufferOfSon);
+	glGenBuffers(1, &bufferOfThinh);
 	glBindBuffer(GL_ARRAY_BUFFER, bufferOfThinh);
 
-	glGenBuffers(1, &bufferOfSon);
+	glGenBuffers(1, &bufferOfNhat);
 	glBindBuffer(GL_ARRAY_BUFFER, bufferOfNhat);
 
-	glGenBuffers(1, &bufferOfSon);
+	glGenBuffers(1, &bufferOfThu);
 	glBindBuffer(GL_ARRAY_BUFFER, bufferOfThu);
 
-	glGenBuffers(1, &bufferOfSon);
+	glGenBuffers(1, &bufferOfHung);
 	glBindBuffer(GL_ARRAY_BUFFER, bufferOfHung);
 
 
@@ -266,7 +266,7 @@ void shaderSetup(void)
 
 	color4 material_ambient(1.0, 0.0, 1.0, 1.0);
 	color4 material_diffuse(1.0, 0.8, 0.0, 1.0);
-	color4 material_specular(1.0, 0.8, 0.0, 1.0);
+	color4 material_specular(1.0, 0.4, 0.0, 1.0);
 	float material_shininess = 100.0;
 
 	color4 ambient_product = light_ambient * material_ambient;
@@ -312,12 +312,55 @@ public:
 
 // Thịnh
 class Thinh {
+	static mat4 model_Car;
+	static mat4 instance_Car;
+	static void drawWheel(float x, float y, float z) {
 
+		color4 light_diffuse(1.0, 1.0, 1.0, 1.0);
+		color4 material_diffuse(0.2, 0.2, 0.2, 1.0);
+		color4 diffuse_product = light_diffuse * material_diffuse;
+		glUniform4fv(glGetUniformLocation(program, "DiffuseProduct"), 1, diffuse_product);
+
+		glUniformMatrix4fv(model_loc, 1, GL_TRUE, model * model_Car * instance_Car);
+
+		// Phải dùng 2 dòng lệnh để vẽ hình trụ hoặc hình lập phương
+		setDrawObject(bufferCylinder, sizeof(pointsCylinder));
+		glDrawArrays(GL_TRIANGLES, 0, NumPointsCylinder);
+	}
+
+	static void drawHub() {
+		instance_Car = Scale(0.03, 0.5, 0.03);
+
+		color4 light_diffuse(1.0, 1.0, 1.0, 1.0);
+		color4 material_diffuse(0.66, 0.66, 0.66, 1.0);
+		color4 diffuse_product = light_diffuse * material_diffuse;
+		glUniform4fv(glGetUniformLocation(program, "DiffuseProduct"), 1, diffuse_product);
+		glUniformMatrix4fv(model_loc, 1, GL_TRUE, model * model_Car * instance_Car);
+
+		// Phải dùng 2 dòng lệnh để vẽ hình trụ hoặc hình lập phương
+		setDrawObject(bufferCylinder, sizeof(pointsCylinder));
+		glDrawArrays(GL_TRIANGLES, 0, NumPointsCylinder);
+	}
+	static void drawHubAndTwoWheel() {
+		drawWheel(0.2, 0.3, 0.5);
+		drawWheel(0.2, -0.3, 0.5);
+	}
+	
 public:
+	static float thetaY;
+
 	static void run() {
+		model_Car = RotateY(thetaY);
+
+		drawWheel(0.2, 0.3, 0.5);
+		drawHub();
+
 	}
 };
 
+mat4 Thinh::instance_Car = RotateX(0);
+mat4 Thinh::model_Car = RotateX(0);
+float Thinh::thetaY = 0;
 
 // Hùng
 class Hung {
@@ -348,8 +391,6 @@ void display(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-	glUniformMatrix4fv(model_loc, 1, GL_TRUE, model);
-
 	vec4 eye(0 + XEye, 0 + YEye, 2 + ZEye, 1);
 	vec4 at(0 + XEye, 0 + YEye, 0 + ZEye, 1);
 	vec4 up(0, 1, 0, 1);
@@ -367,9 +408,6 @@ void display(void)
 	Thu::run();
 	Son::run();
 
-	// Phải dùng 2 dòng lệnh để vẽ hình trụ hoặc hình lập phương
-	setDrawObject(bufferCylinder, sizeof(pointsCylinder));
-	glDrawArrays(GL_TRIANGLES, 0, NumPointsCylinder);
 	  /*Vẽ các tam giác*/
 	glutSwapBuffers();
 }
