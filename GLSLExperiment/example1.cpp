@@ -1,7 +1,7 @@
 ﻿//Chương trình vẽ 1 hình lập phương đơn vị theo mô hình lập trình OpenGL hiện đại
 
 #include "Angel.h"  /* Angel.h là file tự phát triển (tác giả Prof. Angel), có chứa cả khai báo includes glew và freeglut*/
-
+#include "vector"
 
 // remember to prototype
 void generateGeometry(void);
@@ -264,9 +264,9 @@ void shaderSetup(void)
 	color4 light_diffuse(1.0, 1.0, 1.0, 1.0);
 	color4 light_specular(1.0, 1.0, 1.0, 1.0);
 
-	color4 material_ambient(1.0, 0.0, 1.0, 1.0);
+	color4 material_ambient(1.0, 1.0, 1.0, 1.0);
 	color4 material_diffuse(1.0, 0.8, 0.0, 1.0);
-	color4 material_specular(1.0, 0.4, 0.0, 1.0);
+	color4 material_specular(0.2, 0.2, 0.2, 1.0); /*Chinh lai specular cho màu  sắc chính xác*/
 	float material_shininess = 100.0;
 
 	color4 ambient_product = light_ambient * material_ambient;
@@ -314,7 +314,9 @@ public:
 class Thinh {
 	static mat4 model_Car;
 	static mat4 instance_Car;
+	// Vẽ bánh xe
 	static void drawWheel(float x, float y, float z) {
+		instance_Car = Translate(x, y, z) * Scale(0.5, 0.3, 0.5);
 
 		color4 light_diffuse(1.0, 1.0, 1.0, 1.0);
 		color4 material_diffuse(0.2, 0.2, 0.2, 1.0);
@@ -329,10 +331,10 @@ class Thinh {
 	}
 
 	static void drawHub() {
-		instance_Car = Scale(0.03, 0.5, 0.03);
+		instance_Car = Scale(0.03, 2.2, 0.03);
 
 		color4 light_diffuse(1.0, 1.0, 1.0, 1.0);
-		color4 material_diffuse(0.66, 0.66, 0.66, 1.0);
+		color4 material_diffuse(0, 1, 1, 1.0);
 		color4 diffuse_product = light_diffuse * material_diffuse;
 		glUniform4fv(glGetUniformLocation(program, "DiffuseProduct"), 1, diffuse_product);
 		glUniformMatrix4fv(model_loc, 1, GL_TRUE, model * model_Car * instance_Car);
@@ -341,26 +343,412 @@ class Thinh {
 		setDrawObject(bufferCylinder, sizeof(pointsCylinder));
 		glDrawArrays(GL_TRIANGLES, 0, NumPointsCylinder);
 	}
-	static void drawHubAndTwoWheel() {
-		drawWheel(0.2, 0.3, 0.5);
-		drawWheel(0.2, -0.3, 0.5);
+
+	static void drawHubAndTwoWheeFront() {
+		drawHub();
+		drawWheel(0, 0.92, 0);
+		drawWheel(0, -0.92, 0);
+	}
+
+	static mat4 ShearX(float x, float y)
+	{
+		mat4 c;
+		c[0][1] = x;
+		c[0][2] = y;
+		return c;
+	}
+
+	static mat4 ShearY(float x, float y)
+	{
+		mat4 c;
+		c[1][0] = x;
+		c[1][2] = y;
+		return c;
+	}
+
+	static mat4 ShearZ(float x, float y)
+	{
+		mat4 c;
+		c[2][0] = x;
+		c[2][1] = y;
+		return c;
+	}
+
+	// Vẽ đầu xe phía trên
+	static void drawHeadUp() {
+		instance_Car = ShearX(-0.5, 0) * Scale(0.5, 0.5, 1.5);
+
+		color4 light_diffuse(1.0, 1.0, 1.0, 1.0);
+		color4 material_diffuse(1, 0, 0, 1.0);
+		color4 diffuse_product = light_diffuse * material_diffuse;
+		glUniform4fv(glGetUniformLocation(program, "DiffuseProduct"), 1, diffuse_product);
+		glUniformMatrix4fv(model_loc, 1, GL_TRUE, model * model_Car * instance_Car);
+
+		// Phải dùng 2 dòng lệnh để vẽ hình trụ hoặc hình lập phương
+		setDrawObject(bufferCube, sizeof(pointsCube));
+		glDrawArrays(GL_TRIANGLES, 0, NumPointsCube);
+	}
+
+	// Vẽ đầu xe phía đuôi
+	static void drawHeadBeHind() {
+		instance_Car = Translate(-0.625, 0, 0) * Scale(1, 0.5, 1.5);
+
+		color4 light_diffuse(1.0, 1.0, 1.0, 1.0);
+		color4 material_diffuse(1, 0, 0, 1.0);
+		color4 diffuse_product = light_diffuse * material_diffuse;
+		glUniform4fv(glGetUniformLocation(program, "DiffuseProduct"), 1, diffuse_product);
+		glUniformMatrix4fv(model_loc, 1, GL_TRUE, model * model_Car * instance_Car);
+
+		// Phải dùng 2 dòng lệnh để vẽ hình trụ hoặc hình lập phương
+		setDrawObject(bufferCube, sizeof(pointsCube));
+		glDrawArrays(GL_TRIANGLES, 0, NumPointsCube);
+	}
+
+	// Vẽ đầu xe phía dưới
+	static void drawHeadBeBottom() {
+		instance_Car = Translate(-0.375, -0.625, 0) * Scale(1.5, 0.75, 1.5);
+
+		color4 light_diffuse(1.0, 1.0, 1.0, 1.0);
+		color4 material_diffuse(1, 0, 0, 1.0);
+		color4 diffuse_product = light_diffuse * material_diffuse;
+		glUniform4fv(glGetUniformLocation(program, "DiffuseProduct"), 1, diffuse_product);
+		glUniformMatrix4fv(model_loc, 1, GL_TRUE, model * model_Car * instance_Car);
+
+		// Phải dùng 2 dòng lệnh để vẽ hình trụ hoặc hình lập phương
+		setDrawObject(bufferCube, sizeof(pointsCube));
+		glDrawArrays(GL_TRIANGLES, 0, NumPointsCube);
+	}
+
+	// Vẽ đèn xe
+	static void drawLightCar(float x, float y, float z) {
+
+		instance_Car = Translate(x, y, z) * RotateZ(90) * Scale(0.2, 0.1, 0.2);
+
+		color4 light_diffuse(1.0, 1.0, 1.0, 1.0);
+		color4 material_diffuse((float)218/255, (float)165/255, (float)32/255, 1.0);
+		color4 diffuse_product = light_diffuse * material_diffuse;
+		glUniform4fv(glGetUniformLocation(program, "DiffuseProduct"), 1, diffuse_product);
+		glUniformMatrix4fv(model_loc, 1, GL_TRUE, model * model_Car * instance_Car);
+
+		// Phải dùng 2 dòng lệnh để vẽ hình trụ hoặc hình lập phương
+		setDrawObject(bufferCylinder, sizeof(pointsCylinder));
+		glDrawArrays(GL_TRIANGLES, 0, NumPointsCylinder);
+
+	}
+
+	// Vẽ kính
+	static void drawGlassHead() {
+		instance_Car = Translate(0.25, 0, 0) * ShearX(-0.5, 0) * Scale(0.0001, 0.4, 1.3);
+
+		color4 light_diffuse(1.0, 1.0, 1.0, 1.0);
+		color4 material_diffuse(0, 1, 1, 1.0);
+		color4 diffuse_product = light_diffuse * material_diffuse;
+		glUniform4fv(glGetUniformLocation(program, "DiffuseProduct"), 1, diffuse_product);
+		glUniformMatrix4fv(model_loc, 1, GL_TRUE, model * model_Car * instance_Car);
+
+		// Phải dùng 2 dòng lệnh để vẽ hình trụ hoặc hình lập phương
+		setDrawObject(bufferCube, sizeof(pointsCube));
+		glDrawArrays(GL_TRIANGLES, 0, NumPointsCube);
+	}
+	static void drawGlassSide(float side) {
+		instance_Car = Translate(-0.1, 0, side) * ShearX(-0.5, 0) * Scale(0.5, 0.4, 0.0001);
+
+		color4 light_diffuse(1.0, 1.0, 1.0, 1.0);
+		color4 material_diffuse(0, 1, 1, 1.0);
+		color4 diffuse_product = light_diffuse * material_diffuse;
+		glUniform4fv(glGetUniformLocation(program, "DiffuseProduct"), 1, diffuse_product);
+		glUniformMatrix4fv(model_loc, 1, GL_TRUE, model * model_Car * instance_Car);
+
+		// Phải dùng 2 dòng lệnh để vẽ hình trụ hoặc hình lập phương
+		setDrawObject(bufferCube, sizeof(pointsCube));
+		glDrawArrays(GL_TRIANGLES, 0, NumPointsCube);
+	}
+
+	static void drawGlassSide1(float side, float tranX) {
+		instance_Car = Translate(tranX, 0, side) * Scale(0.5, 0.4, 0.0001);
+
+		color4 light_diffuse(1.0, 1.0, 1.0, 1.0);
+		color4 material_diffuse(0, 1, 1, 1.0);
+		color4 diffuse_product = light_diffuse * material_diffuse;
+		glUniform4fv(glGetUniformLocation(program, "DiffuseProduct"), 1, diffuse_product);
+		glUniformMatrix4fv(model_loc, 1, GL_TRUE, model * model_Car * instance_Car);
+
+		// Phải dùng 2 dòng lệnh để vẽ hình trụ hoặc hình lập phương
+		setDrawObject(bufferCube, sizeof(pointsCube));
+		glDrawArrays(GL_TRIANGLES, 0, NumPointsCube);
+	}
+
+	static void drawGlassSideBehind(float side, float tranX) {
+		instance_Car = Translate(tranX, 0, side) * Scale(0.3, 0.4, 0.0001);
+
+		color4 light_diffuse(1.0, 1.0, 1.0, 1.0);
+		color4 material_diffuse(0, 1, 1, 1.0);
+		color4 diffuse_product = light_diffuse * material_diffuse;
+		glUniform4fv(glGetUniformLocation(program, "DiffuseProduct"), 1, diffuse_product);
+		glUniformMatrix4fv(model_loc, 1, GL_TRUE, model * model_Car * instance_Car);
+
+		// Phải dùng 2 dòng lệnh để vẽ hình trụ hoặc hình lập phương
+		setDrawObject(bufferCube, sizeof(pointsCube));
+		glDrawArrays(GL_TRIANGLES, 0, NumPointsCube);
 	}
 	
+	// Vẽ 2 cạnh bên
+	static void drawBackSide(float x, float y , float z) {
+		instance_Car = Translate(x, y, z) * Scale(1.5, 0.75, 0.1);
+
+		color4 light_diffuse(1.0, 1.0, 1.0, 1.0);
+		color4 material_diffuse(1, 0, 0, 1.0);
+		color4 diffuse_product = light_diffuse * material_diffuse;
+		glUniform4fv(glGetUniformLocation(program, "DiffuseProduct"), 1, diffuse_product);
+		glUniformMatrix4fv(model_loc, 1, GL_TRUE, model * model_Car * instance_Car);
+
+		// Phải dùng 2 dòng lệnh để vẽ hình trụ hoặc hình lập phương
+		setDrawObject(bufferCube, sizeof(pointsCube));
+		glDrawArrays(GL_TRIANGLES, 0, NumPointsCube);
+	}
+	// Vẽ 1 cạnh đáy
+	static void drawBackBottom() {
+		instance_Car = Translate(-1.878, -0.95, 0) * Scale(1.5, 0.1, 1.5);
+
+		color4 light_diffuse(1.0, 1.0, 1.0, 1.0);
+		color4 material_diffuse(1, 0, 0, 1.0);
+		color4 diffuse_product = light_diffuse * material_diffuse;
+		glUniform4fv(glGetUniformLocation(program, "DiffuseProduct"), 1, diffuse_product);
+		glUniformMatrix4fv(model_loc, 1, GL_TRUE, model * model_Car * instance_Car);
+
+		// Phải dùng 2 dòng lệnh để vẽ hình trụ hoặc hình lập phương
+		setDrawObject(bufferCube, sizeof(pointsCube));
+		glDrawArrays(GL_TRIANGLES, 0, NumPointsCube);
+	}
+
+	static void drawOutriggers(float x, float y, float z) {
+		instance_Car = Translate(x, y, z) * ShearX(-0.5, 0) * Scale(0.2, 1, 0.1);
+
+		color4 light_diffuse(1.0, 1.0, 1.0, 1.0);
+		color4 material_diffuse((float)0, (float)250 / 255, (float)154 / 255, 1.0);
+		color4 diffuse_product = light_diffuse * material_diffuse;
+		glUniform4fv(glGetUniformLocation(program, "DiffuseProduct"), 1, diffuse_product);
+		glUniformMatrix4fv(model_loc, 1, GL_TRUE, model * model_Car * instance_Car);
+
+		// Phải dùng 2 dòng lệnh để vẽ hình trụ hoặc hình lập phương
+		setDrawObject(bufferCube, sizeof(pointsCube));
+		glDrawArrays(GL_TRIANGLES, 0, NumPointsCube);
+	}
+
+	static void drawElbow() {
+		instance_Car = Translate(-2.7, -0.05, 0) * RotateX(90) * Scale(0.1, 0.75, 0.1);
+
+		color4 light_diffuse(1.0, 1.0, 1.0, 1.0);
+		color4 material_diffuse((float)105 / 255, (float)105 / 255, (float)105 / 255, 1.0);
+		color4 diffuse_product = light_diffuse * material_diffuse;
+		glUniform4fv(glGetUniformLocation(program, "DiffuseProduct"), 1, diffuse_product);
+		glUniformMatrix4fv(model_loc, 1, GL_TRUE, model * model_Car * instance_Car);
+
+		// Phải dùng 2 dòng lệnh để vẽ hình trụ hoặc hình lập phương
+		setDrawObject(bufferCylinder, sizeof(pointsCylinder));
+		glDrawArrays(GL_TRIANGLES, 0, NumPointsCylinder);
+	}
+
+	// biến thay đổi phép biến đổi để vẽ thang
+	static mat4 instance_Stair;
+
+	// chân chống thang
+	static void drawBodyLadder(float x, float y, float z) {
+		instance_Car = instance_Stair * Translate(x, y, z) * Scale(0.05, 2.5, 0.05);
+
+		color4 light_diffuse(1.0, 1.0, 1.0, 1.0);
+		color4 material_diffuse((float)169 / 255, (float)169 / 255, (float)169 / 255, 1.0);
+		color4 diffuse_product = light_diffuse * material_diffuse;
+		glUniform4fv(glGetUniformLocation(program, "DiffuseProduct"), 1, diffuse_product);
+		glUniformMatrix4fv(model_loc, 1, GL_TRUE, model * model_Car * instance_Car);
+
+		// Phải dùng 2 dòng lệnh để vẽ hình trụ hoặc hình lập phương
+		setDrawObject(bufferCube, sizeof(pointsCube));
+		glDrawArrays(GL_TRIANGLES, 0, NumPointsCube);
+	}
+
+	// thanh ngang của thang
+	static void drawRungLadder(float x, float y, float z, float shear/*vẽ thanh ngang chéo*/) {
+		instance_Car = instance_Stair * ShearY(shear, 0) * Translate(x, y, z) * RotateZ(90) * Scale(0.05, 0.4, 0.05);
+
+		color4 light_diffuse(1.0, 1.0, 1.0, 1.0);
+		color4 material_diffuse((float)105 / 255, (float)105 / 255, (float)105 / 255, 1.0);
+		color4 diffuse_product = light_diffuse * material_diffuse;
+		glUniform4fv(glGetUniformLocation(program, "DiffuseProduct"), 1, diffuse_product);
+		glUniformMatrix4fv(model_loc, 1, GL_TRUE, model * model_Car * instance_Car);
+
+		// Phải dùng 2 dòng lệnh để vẽ hình trụ hoặc hình lập phương
+		setDrawObject(bufferCylinder, sizeof(pointsCylinder));
+		glDrawArrays(GL_TRIANGLES, 0, NumPointsCylinder);
+	}
+
+	// Vẽ mặt thang nhỏ
+	static void drawSideLadder() {
+		drawBodyLadder(0.2, 0, 0);
+		drawBodyLadder(-0.2, 0, 0);
+
+		float i = 0; 
+		while (i <= 1) {
+			drawRungLadder(0, -i, 0, 1);
+			drawRungLadder(0, -i, 0, -1);
+			drawRungLadder(0, i, 0, 1);
+			drawRungLadder(0, i, 0, -1);
+			i += 0.5;
+		}
+	}
+
+	// Vẽ thang nhỏ bên trong
+	static void drawInSideLadder() {
+		instance_Stair = Translate(0, 0, 0.2);
+		drawSideLadder();
+		instance_Stair = Translate(0, 0, -0.2);
+		drawSideLadder();
+		instance_Stair = Translate(-0.2, 0, 0) * RotateY(90);
+		drawSideLadder();
+		instance_Stair = Translate(0.2, 0, 0) * RotateY(90);
+		drawSideLadder();
+	}
+
+	// Vẽ mặt thang lớn
+	static void drawSurfaceOfOutSideLadder() {
+		instance_Car = instance_Stair * Scale(0.6975, 2.5, 0.0975);
+
+		color4 light_diffuse(1.0, 1.0, 1.0, 1.0);
+		color4 material_diffuse((float)169 / 255, (float)169 / 255, (float)169 / 255, 1.0);
+		color4 diffuse_product = light_diffuse * material_diffuse;
+		glUniform4fv(glGetUniformLocation(program, "DiffuseProduct"), 1, diffuse_product);
+		glUniformMatrix4fv(model_loc, 1, GL_TRUE, model * model_Car * instance_Car);
+
+		// Phải dùng 2 dòng lệnh để vẽ hình trụ hoặc hình lập phương
+		setDrawObject(bufferCube, sizeof(pointsCube));
+		glDrawArrays(GL_TRIANGLES, 0, NumPointsCube);
+	}
+
+
+	// vẽ bao bọc của thang
+	static void drawOutSideLadder() {
+		instance_Stair = Translate(0, 0, 0.3);
+		drawSurfaceOfOutSideLadder();
+		instance_Stair = Translate(0, 0, -0.3);
+		drawSurfaceOfOutSideLadder();
+		instance_Stair = Translate(-0.3, 0, 0) * RotateY(90);
+		drawSurfaceOfOutSideLadder();
+		instance_Stair = Translate(0.3, 0, 0) * RotateY(90);
+		drawSurfaceOfOutSideLadder();
+	}
+
+	// Vẽ thùng đựng người cứu hỏa
+	static void drawContainer() {
+		// Xét màu
+		color4 light_diffuse(1.0, 1.0, 1.0, 1.0);
+		color4 material_diffuse((float)147/255, (float)112/255, (float)219/255, 1.0);
+		color4 diffuse_product = light_diffuse * material_diffuse;
+		glUniform4fv(glGetUniformLocation(program, "DiffuseProduct"), 1, diffuse_product);
+
+		instance_Car = Translate(0, 0, 0.325) * Scale(0.7, 0.5, 0.05);
+		glUniformMatrix4fv(model_loc, 1, GL_TRUE, model * model_Car * instance_Car);
+		setDrawObject(bufferCube, sizeof(pointsCube));
+		glDrawArrays(GL_TRIANGLES, 0, NumPointsCube);
+
+		instance_Car = Translate(0, 0, -0.325) * Scale(0.7, 0.5, 0.05);
+		glUniformMatrix4fv(model_loc, 1, GL_TRUE, model * model_Car * instance_Car);
+		glDrawArrays(GL_TRIANGLES, 0, NumPointsCube);
+
+		instance_Car = Translate(0.325, 0, 0) * RotateY(90) * Scale(0.7, 0.5, 0.05);
+		glUniformMatrix4fv(model_loc, 1, GL_TRUE, model * model_Car * instance_Car);
+		glDrawArrays(GL_TRIANGLES, 0, NumPointsCube);
+
+		instance_Car = Translate(-0.325, 0, 0) * RotateY(90) * Scale(0.7, 0.5, 0.05);
+		glUniformMatrix4fv(model_loc, 1, GL_TRUE, model * model_Car * instance_Car);
+		glDrawArrays(GL_TRIANGLES, 0, NumPointsCube);
+
+		instance_Car = Translate(0, -0.225, 0) * Scale(0.7, 0.05, 0.7);
+		glUniformMatrix4fv(model_loc, 1, GL_TRUE, model * model_Car * instance_Car);
+		glDrawArrays(GL_TRIANGLES, 0, NumPointsCube);
+	}
+	// Vẽ đầu xe
+	static void drawHead() {
+		drawHeadUp();
+		drawHeadBeHind();
+		drawHeadBeBottom();
+		// Vẽ kính
+		drawGlassHead();
+		drawGlassSide(-0.75);
+		drawGlassSide1(0.75, -0.2);
+		drawGlassSide1(-0.75, -0.2);
+		drawGlassSide(0.75);
+		drawGlassSideBehind(-0.75, -0.8);
+		drawGlassSideBehind(0.75, -0.8);
+		// Vẽ đèn xe
+		drawLightCar(0.36, -0.75, -0.45);
+		drawLightCar(0.36, -0.75, 0.45);
+	}
+
+	// Vẽ đuôi xe
+	static void drawBackCar() {
+		drawBackBottom();
+		drawBackSide(-1.878, -0.6, 0.7);
+		drawBackSide(-1.878, -0.6, -0.7);
+		drawOutriggers(-2.5, -0.45, 0.3);
+		drawOutriggers(-2.5, -0.45, -0.3);
+		drawElbow();
+	}
+
+	// Vẽ toàn bộ xe
+	static void drawbodyCar() {
+		drawHead();
+		drawBackCar(); 
+	}
+
 public:
 	static float thetaY;
+	static float rotateOutSideStair;
+	static float translateInsideStair;
+	static float SpinWheels;
+	static float moveCar;
+
+	static void spinWheel(void)
+	{
+		SpinWheels += 10;
+		if (SpinWheels > 360.0) {
+			SpinWheels -= 360.0;
+		}
+		glutPostRedisplay();
+	}
 
 	static void run() {
-		model_Car = RotateY(thetaY);
+		mat4 model_All_car = Translate(moveCar, 0, 0) * RotateY(thetaY) * Scale(0.5, 0.5, 0.5);
+		model_Car = model_All_car;
+		drawbodyCar();
+		// Thiết kế đuôi xe 
+		model_Car = model_Car * Translate(-2.8, -0.1, 0) * RotateZ(rotateOutSideStair) * Translate(0, 1.1, 0) * Scale(0.95, 0.95, 0.95);
+		drawOutSideLadder();
+		model_Car = model_Car * Translate(0, translateInsideStair, 0);
+		drawInSideLadder();
+		model_Car = model_Car * Translate(0, 1.5, 0) * RotateZ(90 - (rotateOutSideStair + 60 + 20)) * Scale(1, 1.5, 1);
+		drawContainer();
+		model_Car = model_Car * RotateX(90);
 
-		drawWheel(0.2, 0.3, 0.5);
-		drawHub();
+		// Thiết kế bánh xe
+		model_Car = model_All_car * Translate(-0.2, -1, 0) * RotateZ(SpinWheels) * RotateX(90);
+		drawHubAndTwoWheeFront();
+		model_Car = model_All_car * Translate(-2, -1, 0) * RotateZ(SpinWheels) * RotateX(90);
+		drawHubAndTwoWheeFront();
+
+		// Xoay bánh xe
+		//glutIdleFunc(spinWheel);
 
 	}
 };
 
 mat4 Thinh::instance_Car = RotateX(0);
 mat4 Thinh::model_Car = RotateX(0);
+mat4 Thinh::instance_Stair;
 float Thinh::thetaY = 0;
+float Thinh::rotateOutSideStair = -65;
+float Thinh::translateInsideStair = 0.4;
+float Thinh::SpinWheels = 0;
+float Thinh::moveCar = 0;
 
 // Hùng
 class Hung {
@@ -438,6 +826,36 @@ void keyboard(unsigned char key, int x, int y)
 		break;
 	case 'E':
 		YEye -= 0.5;
+		break;
+	case 'm':
+		if (Thinh::translateInsideStair <= 2) {
+			Thinh::translateInsideStair += 0.1;
+		}
+		break;
+	case 'M':
+		if (Thinh::translateInsideStair > 0.4) {
+			Thinh::translateInsideStair -= 0.1;
+		}
+		break;
+	case 'n':
+		if (Thinh::rotateOutSideStair > -65) {
+			Thinh::rotateOutSideStair -= 5;
+		}
+		break;
+	case 'N':
+		if (Thinh::rotateOutSideStair < 0) {
+			Thinh::rotateOutSideStair += 5;
+		}
+		break;
+	case 'b':
+		if (Thinh::moveCar < 5) {
+			Thinh::moveCar += 0.05;
+		}
+		break;
+	case 'B':
+		if (Thinh::moveCar > -5) {
+			Thinh::moveCar -= 0.05;
+		}
 		break;
 	}
 	glutPostRedisplay();
